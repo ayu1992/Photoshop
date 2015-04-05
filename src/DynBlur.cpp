@@ -7,14 +7,14 @@
 using std::cout;
 using std::endl;
 using std::vector;
-//size : 0,1,2
+
 DynBlur::DynBlur(int size){
 
-	m_window_size = size * 4 + 1;
+	m_window_size = size * 10 + 1;
 
 	int mask_size = 3;
 	float val = 0;		
-	float sigma = 20;
+	float sigma = 40;
 	float mean, sum;
 	//initialize its mask
 	vector<vector<float> > mask_value;
@@ -54,19 +54,15 @@ void DynBlur::applyToolOnCanvas(PixelBuffer* canvas){
 	ColorData tmp;
 	
 	for(wsize = m_window_size; wsize > 1; wsize -=2){
-		cout << "applying mask" << wsize<<endl;
-		// convolution about m_startPointx, m_startPointy
 		for(int x = m_startPointx - wsize / 2; x < m_startPointx + wsize/2 + 1; x++){
-	    	for(int y = m_startPointy - wsize / 2; y < wsize + wsize/2 + 1; y++){ 
+	    	for(int y = m_startPointy - wsize / 2; y < m_startPointy + wsize/2 + 1; y++){ 
 		        tmp = ColorData(0.0,0.0,0.0);
 		        //multiply every value of the filter with corresponding image pixel 
 		        for(int mx = 0; mx < mask_width; mx++){
 			        for(int my = 0; my < mask_height; my++){ 
 			            posx = (x - mask_width / 2 + mx); 
 			            posy = (y - mask_height / 2 + my);
-			            // indexing out of window
 			            if(posx < 0 || posy < 0 || posx >=canvas->getWidth() || posy >= canvas->getHeight())	continue;
-			            	cout<<"tmp gets Accumulated"<<endl;
 			            tmp = tmp + (canvas->getPixel(posx,posy) * m_mask->getValue(mx,my));
 			        } 
 			    }  

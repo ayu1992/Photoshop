@@ -12,6 +12,7 @@
 #include "Quantize.h"
 #include "Stamp.h"
 #include "DynBlur.h"
+#include "SaltAndPepper.h"
 #include <cmath>
 
 using std::cout;
@@ -81,9 +82,6 @@ void PhotoShop::mouseDragged(int x, int y)
 
     m_mouseLastX = x;
     m_mouseLastY = y;
-
-    /*TODO for mask based and interactive tools */
-    
     
 }
 
@@ -562,7 +560,13 @@ void PhotoShop::applyFilterQuantize() {
 }
 
 void PhotoShop::applyFilterSpecial() {
-    cout << "Apply has been clicked for Special" << endl;
+    Tool* specialTool = m_toolFactory.getTool(ToolFactory::SALTANDPEPPER,0);
+    if(specialTool == NULL){
+        std::cout<<"current tool is NULL"<<std::endl;
+        return;
+    }
+    specialTool->applyToolOnCanvas(m_displayBuffer);
+    takeSnapshot(m_displayBuffer);
 }
 
 void PhotoShop::undoOperation()

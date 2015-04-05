@@ -18,6 +18,6 @@ public:
 private:
 	int m_window_size;
 	int m_startPointx, m_startPointy;
-	Mask * m_mask; 
+	Mask * m_mask; 	// a 3x3 mask
 };
 #endif

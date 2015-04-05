@@ -1,11 +1,6 @@
 #include <iostream>
 #include "ToolFactory.h"
 #include "Tool.h"
-//#include "MaskBasedTools.h"
-//#include "ConvolutionTools.h"
-//#include "GlobalFilters.h"
-//#include "InteractiveTools.h"
-
 #include "Pen.h"
 #include "Eraser.h"
 #include "CalligraphyPen.h"
@@ -21,6 +16,7 @@
 #include "Quantize.h"
 #include "Stamp.h"
 #include "DynBlur.h"
+#include "SaltAndPepper.h"
 
 using std::cout;
 using std::endl;
@@ -59,11 +55,7 @@ ToolFactory::ToolFactory(){
 		pushVectorsOfSize<Saturate>(&m_tools,1);
 		pushVectorsOfSize<Channels>(&m_tools,1);
 		pushVectorsOfSize<Quantize>(&m_tools,1);
-
-	// size non-adjustable
-	/*	
-		// interactive tools
-	m_tools.push_back(new Dyn_Blur());*/
+		pushVectorsOfSize<SaltAndPepper>(&m_tools,1);
 }
 
 ToolFactory::~ToolFactory(){
