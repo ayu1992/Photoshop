@@ -49,13 +49,15 @@ void DynBlur::setStartPoint(int x, int y){
 void DynBlur::applyToolOnCanvas(PixelBuffer* canvas){
 	int mask_width = m_mask->getWidth();;
 	int mask_height = m_mask->getHeight();
+	int wsize;
 	int posx,posy;
 	ColorData tmp;
 	
-	while(m_window_size > 1){
+	for(wsize = m_window_size; wsize > 1; wsize -=2){
+		cout << "applying mask" << wsize<<endl;
 		// convolution about m_startPointx, m_startPointy
-		for(int x = m_startPointx - m_window_size / 2; x < m_startPointx + m_window_size/2 + 1; x++){
-	    	for(int y = m_startPointy - m_window_size / 2; y < m_window_size + m_window_size/2 + 1; y++){ 
+		for(int x = m_startPointx - wsize / 2; x < m_startPointx + wsize/2 + 1; x++){
+	    	for(int y = m_startPointy - wsize / 2; y < wsize + wsize/2 + 1; y++){ 
 		        tmp = ColorData(0.0,0.0,0.0);
 		        //multiply every value of the filter with corresponding image pixel 
 		        for(int mx = 0; mx < mask_width; mx++){
@@ -63,14 +65,14 @@ void DynBlur::applyToolOnCanvas(PixelBuffer* canvas){
 			            posx = (x - mask_width / 2 + mx); 
 			            posy = (y - mask_height / 2 + my);
 			            // indexing out of window
-			            if(posx < m_startPointx - m_window_size / 2 || posy < m_startPointy - m_window_size / 2 || posx >= m_startPointx + m_window_size/2 || posy >= m_window_size + m_window_size/2 + 1)	continue;
+			            if(posx < m_startPointx - wsize / 2 || posy < m_startPointy - wsize / 2 || posx >= m_startPointx + wsize/2 || posy >= wsize + wsize/2 + 1)	continue;
+			            cout<<"tmp gets Accumulated"<<endl;
 			            tmp = tmp + (canvas->getPixel(posx,posy) * m_mask->getValue(mx,my));
 			        } 
 			    }  
 	        	canvas->setPixel(x,y,tmp.clampedColor());
 	    	}
-	  	}	
-	  	m_window_size-=2;	
+	  	}		
 	}
     
 }
