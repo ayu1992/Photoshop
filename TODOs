@@ -1,0 +1,15 @@
+
+3. Stamp, blur: design 
+enable redo, undo buttons : it blows up
+6. Special filter(LoG?)
+8. code refactoring
+7. error message and invalid case checking
+9. comments in code
+10. memory leak check
+11. speed up implementation
+14. rename pngreader-> pngHandler, rewrite readers
+
+12. design doc
+13. readmes
+
+
