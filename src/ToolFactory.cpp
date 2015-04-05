@@ -9,14 +9,7 @@
 #include "Blur.h"
 #include "Sharpen.h"
 #include "EdgeDetection.h"
-#include "MotionBlur.h"
-#include "Threshold.h"
-#include "Saturate.h"
-#include "Channels.h"
-#include "Quantize.h"
-#include "Stamp.h"
-#include "DynBlur.h"
-#include "SaltAndPepper.h"
+
 
 using std::cout;
 using std::endl;
@@ -74,6 +67,21 @@ Tool* ToolFactory::getTool(ToolType tool_type, int tool_size){
 	return m_tools[tool_type][tool_size];
 }
 
+Threshold* ToolFactory::getThresholdTool(void){
+	return static_cast<Threshold *>(m_tools[THRESHOLD][0]);
+}
+Saturate* ToolFactory::getSaturateTool(void){
+	return static_cast<Saturate *>(m_tools[SATURATE][0]);
+}
+Channels* ToolFactory::getChannelsTool(void){
+	return static_cast<Channels *>(m_tools[CHANNELS][0]);
+}
+Quantize* ToolFactory::getQuantizeTool(void){
+	return static_cast<Quantize *>(m_tools[QUANTIZE][0]);
+}
+Stamp* ToolFactory::getStampTool(void){
+	return static_cast<Stamp *>(m_tools[STAMP][0]);
+}
 Tool* ToolFactory::getMotionBlurTool(int tool_size, int direction){
 	if(tool_size < 0 || tool_size > 20 || direction < 0 || direction > 4){
 		cout << "[ToolFactory] invalid request for tool"<<endl;

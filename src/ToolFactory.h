@@ -2,6 +2,15 @@
 #define TOOLFACTORY_H
 #include <vector>
 #include "Tool.h"
+#include "MotionBlur.h"
+#include "Threshold.h"
+#include "Saturate.h"
+#include "Channels.h"
+#include "Quantize.h"
+#include "Stamp.h"
+#include "DynBlur.h"
+#include "SaltAndPepper.h"
+
 class ToolFactory {
 
 public:
@@ -33,6 +42,11 @@ public:
 	~ToolFactory();
 	
 	Tool* getTool(ToolType tool_type, int tool_size); //returns the correct tool instance from m_tools
+	Threshold* getThresholdTool(void);
+	Saturate* getSaturateTool(void);
+	Channels* getChannelsTool(void);
+	Quantize* getQuantizeTool(void);
+	Stamp * getStampTool(void);
 	Tool* getMotionBlurTool(int tool_size, int direction);
 private:
 	std::vector<std::vector<Tool *> > m_tools; //m_tools is a vector of tool instances

@@ -6,13 +6,6 @@
 #include "PixelBufferManager.h"
 #include "IOHandler.h"
 #include "Util.h"
-#include "Threshold.h"
-#include "Saturate.h"
-#include "Channels.h"
-#include "Quantize.h"
-#include "Stamp.h"
-#include "DynBlur.h"
-#include "SaltAndPepper.h"
 #include <cmath>
 
 using std::cout;
@@ -450,13 +443,12 @@ void PhotoShop::loadImageToCanvas()
 
 void PhotoShop::loadImageToStamp()
 {   PixelBuffer *stamp = m_ioHandler.readImage(m_fileName);
-    Tool * stampTool = m_toolFactory.getTool(ToolFactory::STAMP,0);
+    Stamp * stampTool = m_toolFactory.getStampTool();
     if(stampTool == NULL){
         std::cout<<"current tool is NULL"<<std::endl;
         return;
     }
-    static_cast<Stamp *>(stampTool)->setStamp(stamp);
-
+    stampTool->setStamp(stamp);
 }
 
 void PhotoShop::saveCanvasToFile()
@@ -468,34 +460,34 @@ void PhotoShop::saveCanvasToFile()
 
 void PhotoShop::applyFilterThreshold()
 {
-    Tool* thresholdTool = m_toolFactory.getTool(ToolFactory::THRESHOLD,0);
+    Threshold* thresholdTool = m_toolFactory.getThresholdTool();
     if(thresholdTool == NULL){
         std::cout<<"current tool is NULL"<<std::endl;
         return;
     }
-    static_cast<Threshold *>(thresholdTool)->applyThreshold(m_displayBuffer, m_filterParameters.threshold_amount);
+    thresholdTool->applyThreshold(m_displayBuffer, m_filterParameters.threshold_amount);
     takeSnapshot(m_displayBuffer);
 }
 
 void PhotoShop::applyFilterChannel()
 {
-    Tool* channelsTool = m_toolFactory.getTool(ToolFactory::CHANNELS,0);
+    Channels* channelsTool = m_toolFactory.getChannelsTool();
     if(channelsTool == NULL){
         std::cout<<"current tool is NULL"<<std::endl;
         return;
     }
-    static_cast<Channels *>(channelsTool)->applyChannels(m_displayBuffer, m_filterParameters.channel_colorRed, m_filterParameters.channel_colorGreen, m_filterParameters.channel_colorBlue);
+    channelsTool->applyChannels(m_displayBuffer, m_filterParameters.channel_colorRed, m_filterParameters.channel_colorGreen, m_filterParameters.channel_colorBlue);
     takeSnapshot(m_displayBuffer);
 }
 
 void PhotoShop::applyFilterSaturate()
 {
-    Tool* saturateTool = m_toolFactory.getTool(ToolFactory::SATURATE,0);
+    Saturate* saturateTool = m_toolFactory.getSaturateTool();
     if(saturateTool == NULL){
         std::cout<<"current tool is NULL"<<std::endl;
         return;
     }
-    static_cast<Saturate *>(saturateTool)->applySaturate(m_displayBuffer,  m_filterParameters.saturation_amount);
+    saturateTool->applySaturate(m_displayBuffer,  m_filterParameters.saturation_amount);
     takeSnapshot(m_displayBuffer);
 }
 
@@ -549,12 +541,12 @@ void PhotoShop::applyFilterEdgeDetect() {
 
 void PhotoShop::applyFilterQuantize() {
 
-    Tool* quantizeTool = m_toolFactory.getTool(ToolFactory::QUANTIZE,0);
+    Quantize* quantizeTool = m_toolFactory.getQuantizeTool();
     if(quantizeTool == NULL){
         std::cout<<"current tool is NULL"<<std::endl;
         return;
     }
-    static_cast<Quantize *>(quantizeTool)->applyQuantize(m_displayBuffer, m_filterParameters.quantize_bins);
+    quantizeTool->applyQuantize(m_displayBuffer, m_filterParameters.quantize_bins);
     takeSnapshot(m_displayBuffer);
 
 }
