@@ -33,6 +33,7 @@ public:
 	
 	Tool* getTool(ToolType tool_type, int tool_size); //returns the correct tool instance from m_tools
 	Tool* getMotionBlurTool(int tool_size, int direction);
+	Tool* getDynBlurTool();
 private:
 	std::vector<std::vector<Tool *> > m_tools; //m_tools is a vector of tool instances
 };

@@ -11,6 +11,7 @@
 #include "Channels.h"
 #include "Quantize.h"
 #include "Stamp.h"
+#include "DynBlur.h"
 #include <cmath>
 
 using std::cout;
@@ -48,11 +49,12 @@ void PhotoShop::mouseDragged(int x, int y)
     if(m_curTool == ToolFactory::STAMP) toolSize = 0;
 
     Tool* currentTool = m_toolFactory.getTool(getCurrentToolType(), toolSize);
+
     if(currentTool == NULL){
         std::cout<<"current tool is NULL"<<std::endl;
         return;
     }
-
+    
     int max_steps = 25;
     int height = m_displayBuffer->getHeight(); 
 
@@ -92,18 +94,17 @@ void PhotoShop::mouseMoved(int x, int y)
 
 void PhotoShop::leftMouseDown(int x, int y)
 {
-    /*TODO for mask based and interactive tools */
-    // get requested Tool instance
+    int height = m_displayBuffer->getHeight(); 
     int toolSize = m_curSize;
-    if(m_curTool == ToolFactory::STAMP) toolSize = 0;
-
+    if(m_curTool == ToolFactory::STAMP) toolSize = 0;        
+    
     Tool* currentTool = m_toolFactory.getTool(getCurrentToolType(), toolSize);
-    int height = m_displayBuffer->getHeight();
+    
     if(currentTool == NULL){
-        std::cout << "current tool is null"<< endl;
+        std::cout<<"current tool is NULL"<<std::endl;
         return;
-    } 
-    // set up tool color and position
+    }
+        // set up tool color and position
     currentTool->setStartPoint(x,height - y);
     currentTool->setCurrentColor(ColorData(m_curColorRed, m_curColorGreen, m_curColorBlue));
     currentTool->applyToolOnCanvas(m_displayBuffer);

@@ -20,7 +20,7 @@
 #include "Channels.h"
 #include "Quantize.h"
 #include "Stamp.h"
-
+#include "DynBlur.h"
 
 using std::cout;
 using std::endl;
@@ -50,7 +50,7 @@ ToolFactory::ToolFactory(){
 		pushVectorsOfSize<CalligraphyPen>(&m_tools, 3);
 		pushVectorsOfSize<Highlighter>(&m_tools, 3);
 		pushVectorsOfSize<Stamp>(&m_tools,1);
-		pushVectorsOfSize<DynBlur>(&m_tools,1);
+		pushVectorsOfSize<DynBlur>(&m_tools,3);
 		pushVectorsOfSize<Blur>(&m_tools, 21);
 		pushVectorsOfSize<Sharpen>(&m_tools,21);
 		pushVectorsOfSize<EdgeDetection>(&m_tools,1);
