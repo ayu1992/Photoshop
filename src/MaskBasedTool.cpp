@@ -2,21 +2,17 @@
 #include "ColorData.h"
 #include "PixelBuffer.h"
 #include <iostream>
-using std::cout;
+using std::cerr;
 using std::endl;
 
-MaskBasedTool::MaskBasedTool(){
-
-	// initialize 
-	m_curSize = 0;
-	m_mask = NULL;
-}
+MaskBasedTool::MaskBasedTool():m_curSize(0),m_mask(NULL){}
 
 
 MaskBasedTool::~MaskBasedTool(){
 	delete m_mask;	
 }
 
+/*Setters*/
 void MaskBasedTool::setStartPoint(int x, int y){
 	m_startPoint_x = x;
 	m_startPoint_y = y;
@@ -26,11 +22,12 @@ void MaskBasedTool::setCurrentColor(ColorData color_data){
 	m_curColor = color_data;
 }
 
+// Default implementation of 2D dot-product
 void MaskBasedTool::applyToolOnCanvas(PixelBuffer* pixel_buffer){
 
 	// check if the tool mask is valid
 	if(m_mask == NULL){
-		cout << "mask is null" << endl;
+		cerr << "mask is null" << endl;
 		return;
 	}
 
@@ -55,8 +52,12 @@ void MaskBasedTool::applyToolOnCanvas(PixelBuffer* pixel_buffer){
 		}
 	}
 }
+
+// Helper function to calculate new pixel values
 ColorData MaskBasedTool::getColor(ColorData currentColor, ColorData bgColor,float mask_val){
+
 	float intensity = mask_val * bgColor.getLuminance();	
+	
 	return currentColor * intensity + bgColor * (1-intensity);
 }
 

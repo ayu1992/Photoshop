@@ -28,7 +28,6 @@ PixelBuffer* PixelBufferManager::getLatestSnapshot(void){
 		cout<< "[PBManager] accessing invalid element of m_snapshots"<<endl;
 		return NULL;
 	}
-	cout << "getting image"<< m_currentIdx << endl;
 	PixelBuffer* cpy = new PixelBuffer(m_snapshots[m_currentIdx]->getWidth(),m_snapshots[m_currentIdx]->getHeight(),ColorData(0.0,0.0,0.0));
 	PixelBuffer::copyPixelBuffer(m_snapshots[m_currentIdx],cpy);
 	return cpy;
@@ -36,11 +35,11 @@ PixelBuffer* PixelBufferManager::getLatestSnapshot(void){
 
 void PixelBufferManager::undo (void){
 	if (canUndo()) m_currentIdx--;
-	cout << "current idx = "<<m_currentIdx<<endl;
+	
 }
 void PixelBufferManager::redo (void){
 	if( canRedo()) m_currentIdx++;
-	cout << "current idx = "<<m_currentIdx<<endl;
+
 }
 
 void PixelBufferManager::takeSnapshot(PixelBuffer* unsavedCanvas){

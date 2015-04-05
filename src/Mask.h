@@ -1,3 +1,8 @@
+//
+// Mask.h
+//
+// Defines a 2D mask
+
 #ifndef MASK_H
 #define MASK_H
 #include <vector>
@@ -10,15 +15,14 @@ public:
 	//Getters
 	int getWidth();
 	int getHeight();
-	const std::vector<std::vector<float> >& getMask();	// const: immutable
+	const std::vector<std::vector<float> >& getMask();	
 	float getValue(int x, int y);
 
-	//friend Mask operator- (const Mask& a, const Mask& b);
 private:
 	
-	int m_width;
+	int m_width;										// mask dimensions
 	int m_height;
-	std::vector<std::vector<float> > m_value;			// a matrix that stores mask values
+	std::vector<std::vector<float> > m_value;			// a 2D matrix that stores intensity values
 };
 
 #endif

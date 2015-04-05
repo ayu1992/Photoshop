@@ -13,7 +13,9 @@
 
 using std::cout;
 using std::endl;
+using std::cerr;
 
+/*Constructs m_tools*/
 template <typename T>
 void pushVectorsOfSize(std::vector<std::vector<Tool*> >* tools, int sizes) {
 	tools->push_back(std::vector<Tool*>());
@@ -31,7 +33,6 @@ void pushMotionBlur(std::vector<std::vector<Tool*> >* tools, int sizes, int dire
 /*ToolFactory is a singleton*/
 /*initalize all tools, only called once at the start of program*/
 ToolFactory::ToolFactory(){
-	// mask based tools, size adjustable
 
 		pushVectorsOfSize<Pen>(&m_tools, 3);
 		pushVectorsOfSize<Eraser>(&m_tools, 3);
@@ -57,34 +58,47 @@ ToolFactory::~ToolFactory(){
 	}
 }
 
-/*TODO: is there a way to change int -> ToolType? C style glui*/
 /*ToolFactory returns the requested tool instance */
 Tool* ToolFactory::getTool(ToolType tool_type, int tool_size){
+	
 	if(tool_type < 0 || tool_type >= m_tools.size() || tool_size < 0 || tool_size >= m_tools[tool_type].size()){
-		cout << "[ToolFactory] invalid request for tool"<< tool_type<< " size"<<tool_size<<endl;
+		cerr << "[ToolFactory] invalid request for tool"<< tool_type<< " size"<<tool_size<<endl;
 		return NULL;
 	}
+	
 	return m_tools[tool_type][tool_size];
 }
 
+/*ToolFactory returns the requested tool instance */
 Threshold* ToolFactory::getThresholdTool(void){
 	return static_cast<Threshold *>(m_tools[THRESHOLD][0]);
 }
+
+/*ToolFactory returns the requested tool instance */
 Saturate* ToolFactory::getSaturateTool(void){
 	return static_cast<Saturate *>(m_tools[SATURATE][0]);
 }
+
+/*ToolFactory returns the requested tool instance */
 Channels* ToolFactory::getChannelsTool(void){
 	return static_cast<Channels *>(m_tools[CHANNELS][0]);
 }
+
+/*ToolFactory returns the requested tool instance */
 Quantize* ToolFactory::getQuantizeTool(void){
 	return static_cast<Quantize *>(m_tools[QUANTIZE][0]);
 }
+
+/*ToolFactory returns the requested tool instance */
 Stamp* ToolFactory::getStampTool(void){
 	return static_cast<Stamp *>(m_tools[STAMP][0]);
 }
+
+/*ToolFactory returns the requested tool instance */
 Tool* ToolFactory::getMotionBlurTool(int tool_size, int direction){
+	
 	if(tool_size < 0 || tool_size > 20 || direction < 0 || direction > 4){
-		cout << "[ToolFactory] invalid request for tool"<<endl;
+		cerr << "[ToolFactory] invalid request for motion blur tool"<<endl;
 		return NULL;
 	}
 	return m_tools[MOTION_BLUR][tool_size * 4 + direction];

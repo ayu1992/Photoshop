@@ -9,6 +9,7 @@ Blur::Blur(int m_size){
 
 	// Check if the requested tool size is valid.
 	m_size = (m_size < 1) ? 1 : m_size;
+	
 	// round m_size to nearest odd number
 	m_size = (m_size % 2 == 1) ? m_size : m_size + 1 ;
 

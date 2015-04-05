@@ -2,18 +2,12 @@
 #include <cstdlib>
 #include "jpeglib.h"
 #include <setjmp.h>
-#include "JpegReader.h"
+#include "JpegHandler.h"
 #include "ColorData.h"  
 #include "PixelBuffer.h"
 
-// needed for write
-//extern JSAMPLE * image_buffer;	/* Points to large array of R,G,B-order data */
-//extern int image_height;	/* Number of rows in image */
-//extern int image_width;		/* Number of columns in image */
-
-
-JpegReader::JpegReader(){}
-JpegReader::~JpegReader(){}
+JpegHandler::JpegHandler(){}
+JpegHandler::~JpegHandler(){}
 
 struct my_error_mgr {
   struct jpeg_error_mgr pub;	/* "public" fields */
@@ -42,7 +36,7 @@ my_error_exit (j_common_ptr cinfo)
 }
 
 
-PixelBuffer* JpegReader::read_jpeg_file (const char* filename)
+PixelBuffer* JpegHandler::read_jpeg_file (const char* filename)
 {
 
   struct jpeg_decompress_struct cinfo;
@@ -97,7 +91,7 @@ PixelBuffer* JpegReader::read_jpeg_file (const char* filename)
   /* Step 6: while (scan lines remain to be read) */
   /*           jpeg_read_scanlines(...); */
   int channels = (int)cinfo.output_components;
-  // channels = 3 or 4
+
   while (cinfo.output_scanline < cinfo.output_height) {
     (void) jpeg_read_scanlines(&cinfo, buffer, 1);
     for( i = 0; i < row_stride - channels; i += channels) 
@@ -117,7 +111,7 @@ PixelBuffer* JpegReader::read_jpeg_file (const char* filename)
   return pb;
 }
 
-void JpegReader::write_jpeg_file (const char* filename, PixelBuffer* src){
+void JpegHandler::write_jpeg_file (const char* filename, PixelBuffer* src){
 
   struct jpeg_compress_struct cinfo;
   struct jpeg_error_mgr jerr;

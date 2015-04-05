@@ -3,27 +3,23 @@
 #include <cstdio>
 #include <cstring>
 #include <png.h>
-#include "PngReader.h"
+#include "PngHandler.h"
 #include "ColorData.h"  
 #include "PixelBuffer.h"
 
-    int width, height;
-    png_structp png_ptr;
-    png_infop info_ptr;
-    int x, y, channels;   
-    int number_of_passes;
-    png_byte color_type;
-    png_byte bit_depth;
-    png_bytep * row_pointers;
-    unsigned int sig_read = 0; 
+PngHandler::PngHandler(){}
+PngHandler::~PngHandler(){}
 
-PngReader::PngReader(){}
-PngReader::~PngReader(){}
-
-PixelBuffer* PngReader::read_png_file(const char* file_name)
+PixelBuffer* PngHandler::read_png_file(const char* file_name)
 {
-        
+        // Declare variables
+        int width, height, x, y, channels, number_of_passes;
+        png_structp png_ptr;
+        png_infop info_ptr; 
+        png_byte color_type, bit_depth;
+        png_bytep * row_pointers;
 
+        unsigned int sig_read = 0; 
         /* open file and test for it being a png */
         FILE *fp = fopen(file_name, "rb");
 
@@ -73,7 +69,7 @@ PixelBuffer* PngReader::read_png_file(const char* file_name)
         for (y = 0; y < height; y++) {
                 png_byte* row = row_pointers[y];
                 for (x = 0; x < width; x++) {
-                        png_byte* ptr = &(row[x*channels]);    // 4 -> transparent pictures
+                        png_byte* ptr = &(row[x*channels]);  
                         pb->setPixel( x, height - 1 - y, ColorData(ptr[0]/255.0, ptr[1]/255.0, ptr[2]/255.0, channels == 4 ? ptr[3]/255.0 : 1));
                 }
         }
@@ -81,8 +77,15 @@ PixelBuffer* PngReader::read_png_file(const char* file_name)
 
 }
 
-void PngReader::write_png_file(const char* file_name,  PixelBuffer* src)
+void PngHandler::write_png_file(const char* file_name,  PixelBuffer* src)
 {
+        // Declare variables
+        int width, height, x, y, channels, number_of_passes;
+        png_structp png_ptr;
+        png_infop info_ptr; 
+        png_byte color_type, bit_depth;
+        png_bytep * row_pointers;
+
         /* create file */
         FILE *fp = fopen(file_name, "wb");
 
@@ -95,10 +98,8 @@ void PngReader::write_png_file(const char* file_name,  PixelBuffer* src)
 
         png_init_io(png_ptr, fp);
 
-
         /* write header */
         setjmp(png_jmpbuf(png_ptr));
-                //abort_("[write_png_file] Error during writing header");
 
         width = src->getWidth();
         height = src->getHeight();
@@ -130,13 +131,11 @@ void PngReader::write_png_file(const char* file_name,  PixelBuffer* src)
 
         /* end write */
         setjmp(png_jmpbuf(png_ptr));
-                //abort_("[write_png_file] Error during end of write");
 
         png_write_end(png_ptr, NULL);
 
         /* cleanup heap allocation */
-        for (y=0; y<height; y++)
-                free(row_pointers[y]);
+        for (y=0; y<height; y++)    free(row_pointers[y]);
         free(row_pointers);
 
         fclose(fp);

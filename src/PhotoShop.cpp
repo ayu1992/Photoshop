@@ -8,8 +8,9 @@
 #include "Util.h"
 #include <cmath>
 
-using std::cout;
+using std::cerr;
 using std::endl;
+using std::cout;
 
 PhotoShop::PhotoShop(int argc, char* argv[], int width, int height, ColorData backgroundColor) : BaseGfxApp(argc, argv, width, height, 50, 50, GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH, true, width+51, 50),m_displayBuffer(NULL)
 {
@@ -40,39 +41,51 @@ void PhotoShop::mouseDragged(int x, int y)
 {
 
     int toolSize = m_curSize;
+
+    // The Stamp tool only has one size, so override m_curSize(set by panel)
     if(m_curTool == ToolFactory::STAMP) toolSize = 0;
 
     Tool* currentTool = m_toolFactory.getTool(getCurrentToolType(), toolSize);
 
     if(currentTool == NULL){
-        std::cout<<"current tool is NULL"<<std::endl;
+        std::cerr<<"current tool is NULL"<<std::endl;
         return;
     }
     
+    // Interpolate between points to create smooth lines 
     int max_steps = 25;
     int height = m_displayBuffer->getHeight(); 
 
+    // Get the differences between the events
+    // in each direction
     int delta_x = x-m_mouseLastX;
     int delta_y = y-m_mouseLastY;
 
+    // Calculate the min number of steps necesary to fill
+    // completely between the two event locations.
     float pixelsBetween = fmax(abs(delta_x), abs(delta_y));
     int step_count = pixelsBetween;
     int step_size = 1;
-    
+
+    // Optimize by maxing out at the max_steps,
+    // and fill evenly between
     if (pixelsBetween > max_steps){
         step_size = pixelsBetween/max_steps;
         step_count = max_steps;
     }
-    
+
+    // Iterate between the event locations
     for (int i = 0; i < pixelsBetween; i+=step_size) 
     {
         int x = m_mouseLastX+(i*delta_x/pixelsBetween);
         int y = m_mouseLastY+(i*delta_y/pixelsBetween);
         
+        // Apply tool, centered at location x, height-y
         currentTool->setStartPoint(x,height-y);
         currentTool->applyToolOnCanvas(m_displayBuffer); 
     }
 
+    // let the previous point catch up with the current.
     m_mouseLastX = x;
     m_mouseLastY = y;
     
@@ -85,32 +98,40 @@ void PhotoShop::mouseMoved(int x, int y)
 
 void PhotoShop::leftMouseDown(int x, int y)
 {
+    // for display
     int height = m_displayBuffer->getHeight(); 
+    
+    // The Stamp tool only has one size, so override m_curSize(set by panel)
     int toolSize = m_curSize;
     if(m_curTool == ToolFactory::STAMP) toolSize = 0;        
     
     Tool* currentTool = m_toolFactory.getTool(getCurrentToolType(), toolSize);
     
     if(currentTool == NULL){
-        std::cout<<"current tool is NULL"<<std::endl;
+        std::cerr<<"current tool is NULL"<<std::endl;
         return;
     }
-        // set up tool color and position
+    
+    // set up tool color and position
     currentTool->setStartPoint(x,height - y);
     currentTool->setCurrentColor(ColorData(m_curColorRed, m_curColorGreen, m_curColorBlue));
     currentTool->applyToolOnCanvas(m_displayBuffer);
 
+    // let the previous point catch up with the current.
     m_mouseLastX = x;
     m_mouseLastY = y;
 }
 
 void PhotoShop::leftMouseUp(int x, int y)
 {
+    // An action has been applied to the canvas, so save the current state
     takeSnapshot(m_displayBuffer);
 }
 
-void PhotoShop::initializeBuffers(ColorData backgroundColor, int width, int height) {
+void PhotoShop::initializeBuffers(ColorData backgroundColor, int width, int height){
+    // m_pbManager now owns the initial state of our canvas
     takeSnapshot(new PixelBuffer(width, height, backgroundColor));
+    // display a copy of the stored version
     loadSnapshot(m_pbManager.getLatestSnapshot());
 }
 
@@ -300,7 +321,6 @@ void PhotoShop::initGlui()
 
 void PhotoShop::gluiControl(int controlID)
 {
-    
     switch (controlID) {
         case UI_PRESET_RED:
             m_curColorRed = 1;
@@ -398,7 +418,7 @@ void PhotoShop::gluiControl(int controlID)
             setImageFile(m_fileName);
             break;
         case UI_UNDO:
-            undoOperation();
+            undoOperation();    
             break;
         case UI_REDO:
             redoOperation();
@@ -414,164 +434,225 @@ void PhotoShop::gluiControl(int controlID)
 // **********************
 // *** GLUI CALLBACKS ***
 
-// Edit these functions to provide instructions
-// for how PhotoShop should respond to the
-// button presses.
-
-// this function is only called by undo,redo,loadImage
+/* This function is only called after Undo,Redo and LoadImageToCanvas
+ * Loads a canvas snapshot stored in m_pbManager to the displaying canvas
+ */
 void PhotoShop::loadSnapshot(PixelBuffer* newCanvas){
+    
+    // Discard the dirty canvas
     if(m_displayBuffer) delete m_displayBuffer;       
+    
+    // Display the loaded snapshot
     m_displayBuffer = newCanvas;
+    
+    // Update display informations
     setWindowDimensions(m_displayBuffer->getWidth(),m_displayBuffer->getHeight()); 
-    //cout<<"loading snapshot"<<endl;
 }
 
+/* This function is called after any action has been applied to the canvas.
+ * m_pbManager will store (and own) the latest snapshot 
+ */
 void PhotoShop::takeSnapshot(PixelBuffer* unsaved){
+    
     m_pbManager.takeSnapshot(unsaved);
-    //cout<<"taking snapshot"<<endl;
+
 }
+
+/* This function will read an image file to our Photoshop and display it.*/
 void PhotoShop::loadImageToCanvas()
 {
+    // IOHandler reads the file and converts it to Pixelbuffer format
     PixelBuffer *local = m_ioHandler.readImage(m_fileName);
-    /*TODO: handle read fail*/
-    takeSnapshot(local);      // manager now owns a copy
-    // display the copied version
-    delete local;
-    loadSnapshot(m_pbManager.getLatestSnapshot());
 
+    // The image is the current state of our canvas, so take snapshot
+    takeSnapshot(local);      
+    delete local;
+
+    // Display lastest snapshot
+    loadSnapshot(m_pbManager.getLatestSnapshot());
 }
 
 void PhotoShop::loadImageToStamp()
-{   PixelBuffer *stamp = m_ioHandler.readImage(m_fileName);
+{   
+    // IOHandler reads the file and converts it to Pixelbuffer format
+    PixelBuffer *stamp = m_ioHandler.readImage(m_fileName);
+
+    // Get Stamp tool from factory
     Stamp * stampTool = m_toolFactory.getStampTool();
     if(stampTool == NULL){
-        std::cout<<"current tool is NULL"<<std::endl;
+        std::cerr<<"stamp tool is NULL"<<std::endl;
         return;
     }
+
+    // Set up stamp tool
     stampTool->setStamp(stamp);
 }
 
 void PhotoShop::saveCanvasToFile()
 {   
-    // pass a copy of m_displayBuffer instead
-    m_ioHandler.writeImage((std::string("new_") + m_fileName), m_displayBuffer);
-    cout<<" file write complete"<<endl;
+    // Write m_displayBuffer to image file
+    m_ioHandler.writeImage((std::string("edited_") + m_fileName), m_displayBuffer);
+    std::cout<<" file write complete"<<endl;
 }
 
 void PhotoShop::applyFilterThreshold()
 {
+    // Get threshold tool from factory
     Threshold* thresholdTool = m_toolFactory.getThresholdTool();
     if(thresholdTool == NULL){
-        std::cout<<"current tool is NULL"<<std::endl;
+        std::cerr<<"threshold tool is NULL"<<std::endl;
         return;
     }
+    // Apply tool on canvas
     thresholdTool->applyThreshold(m_displayBuffer, m_filterParameters.threshold_amount);
+
+    // An action has been applied, save canvas state
     takeSnapshot(m_displayBuffer);
 }
 
 void PhotoShop::applyFilterChannel()
 {
+    // Get channels tool from factory
     Channels* channelsTool = m_toolFactory.getChannelsTool();
     if(channelsTool == NULL){
-        std::cout<<"current tool is NULL"<<std::endl;
+        std::cerr<<"current tool is NULL"<<std::endl;
         return;
     }
+    // Apply tool on canvas
     channelsTool->applyChannels(m_displayBuffer, m_filterParameters.channel_colorRed, m_filterParameters.channel_colorGreen, m_filterParameters.channel_colorBlue);
+    
+    // An action has been applied, save canvas state
     takeSnapshot(m_displayBuffer);
 }
 
 void PhotoShop::applyFilterSaturate()
 {
+    // Get saturate tool from factory
     Saturate* saturateTool = m_toolFactory.getSaturateTool();
     if(saturateTool == NULL){
-        std::cout<<"current tool is NULL"<<std::endl;
+        std::cerr<<"current tool is NULL"<<std::endl;
         return;
     }
+
+    // Apply tool on canvas
     saturateTool->applySaturate(m_displayBuffer,  m_filterParameters.saturation_amount);
+
+     // An action has been applied, save canvas state
     takeSnapshot(m_displayBuffer);
 }
 
 void PhotoShop::applyFilterBlur()
 {
+    // Get blur tool from factory
     Tool* blurTool = m_toolFactory.getTool(ToolFactory::BLUR,m_filterParameters.blur_amount);
     if(blurTool == NULL){
-        std::cout<<"current tool is NULL"<<std::endl;
+        std::cerr<<"current tool is NULL"<<std::endl;
         return;
     }
-    // merge?
+
+    // Apply tool on canvas
     blurTool->applyToolOnCanvas(m_displayBuffer);
+
+     // An action has been applied, save canvas state
     takeSnapshot(m_displayBuffer);
 
 }
 
 void PhotoShop::applyFilterSharpen()
 {
+    // Get sharpen tool from factory
     Tool* sharpenTool = m_toolFactory.getTool(ToolFactory::SHARPEN,m_filterParameters.blur_amount);
     if(sharpenTool == NULL){
-        std::cout<<"current tool is NULL"<<std::endl;
+        std::cerr<<"current tool is NULL"<<std::endl;
         return;
     }
-    // merge?
+
+    // Apply tool on canvas
     sharpenTool->applyToolOnCanvas(m_displayBuffer);
+
+     // An action has been applied, save canvas state
     takeSnapshot(m_displayBuffer);
 }
 
 void PhotoShop::applyFilterMotionBlur()
 {
+    // Get motion blur tool from factory
     Tool* motionBlurTool = m_toolFactory.getMotionBlurTool(m_filterParameters.motionBlur_amount,m_filterParameters.motionBlur_direction);
     if(motionBlurTool == NULL){
-        std::cout<<"current tool is NULL"<<std::endl;
+        std::cerr<<"current tool is NULL"<<std::endl;
         return;
     }
-    // merge?
+
+    // Apply tool on canvas
     motionBlurTool->applyToolOnCanvas(m_displayBuffer);
+
+    // An action has been applied, save canvas state
     takeSnapshot(m_displayBuffer);
 }
 
-void PhotoShop::applyFilterEdgeDetect() {
+void PhotoShop::applyFilterEdgeDetect() 
+{
+    // Get edge detection tool from factory
     Tool* edgeDetectTool = m_toolFactory.getTool(ToolFactory::EDGE_DETECTION,0);
     if(edgeDetectTool == NULL){
-        std::cout<<"current tool is NULL"<<std::endl;
+        std::cerr<<"current tool is NULL"<<std::endl;
         return;
     }
-    // merge?
+
+    // Apply tool on canvas
     edgeDetectTool->applyToolOnCanvas(m_displayBuffer);
+
+    // An action has been applied, save canvas state
     takeSnapshot(m_displayBuffer);
 }
 
-void PhotoShop::applyFilterQuantize() {
-
+void PhotoShop::applyFilterQuantize() 
+{
+    // Get quantize tool from factory
     Quantize* quantizeTool = m_toolFactory.getQuantizeTool();
     if(quantizeTool == NULL){
-        std::cout<<"current tool is NULL"<<std::endl;
+        std::cerr<<"current tool is NULL"<<std::endl;
         return;
     }
-    quantizeTool->applyQuantize(m_displayBuffer, m_filterParameters.quantize_bins);
-    takeSnapshot(m_displayBuffer);
 
+    // Apply tool on canvas
+    quantizeTool->applyQuantize(m_displayBuffer, m_filterParameters.quantize_bins);
+
+    // An action has been applied, save canvas state
+    takeSnapshot(m_displayBuffer);
 }
 
-void PhotoShop::applyFilterSpecial() {
+void PhotoShop::applyFilterSpecial() 
+{
+    // Get salt and pepper tool from factory
     Tool* specialTool = m_toolFactory.getTool(ToolFactory::SALTANDPEPPER,0);
     if(specialTool == NULL){
-        std::cout<<"current tool is NULL"<<std::endl;
+        std::cerr<<"current tool is NULL"<<std::endl;
         return;
     }
+
+    // Apply tool on canvas
     specialTool->applyToolOnCanvas(m_displayBuffer);
+
+    // An action has been applied, save canvas state
     takeSnapshot(m_displayBuffer);
 }
 
 void PhotoShop::undoOperation()
 {
-    cout << "Undoing..." << endl;
+    // Canvas moves to a previous state
     m_pbManager.undo();
+    
+    // Get the correct canvas from manager
     loadSnapshot(m_pbManager.getLatestSnapshot());
 }
 
 void PhotoShop::redoOperation()
 {
-    cout << "Redoing..." << endl;
+    // Canvas moves to the next state
     m_pbManager.redo();
+
+    // Get the correct canvas from manager
     loadSnapshot(m_pbManager.getLatestSnapshot());
 }
 // ** END OF CALLBACKS **
@@ -665,7 +746,7 @@ void PhotoShop::setImageFile(const std::string & fileName)
         m_gluiControlHooks.saveFileLabel->set_text("Will save image: none");
         saveCanvasEnabled(false);
     } else {
-        m_gluiControlHooks.saveFileLabel->set_text((std::string("Will save image: ") + imageFile).c_str());
+        m_gluiControlHooks.saveFileLabel->set_text((std::string("Will save image: edited_") + imageFile).c_str());
         saveCanvasEnabled(true);
     }
     
@@ -685,7 +766,7 @@ void PhotoShop::setImageFile(const std::string & fileName)
         m_gluiControlHooks.currentFileLabel->set_text("Will load: none");
     }
 }
-
+// Converts m_curTool(integer) to corresponding enum ToolType 
 ToolFactory::ToolType PhotoShop::getCurrentToolType(){
     return static_cast<ToolFactory::ToolType>(m_curTool);
 }

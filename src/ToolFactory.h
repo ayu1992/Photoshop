@@ -41,15 +41,18 @@ public:
 	ToolFactory();
 	~ToolFactory();
 	
-	Tool* getTool(ToolType tool_type, int tool_size); //returns the correct tool instance from m_tools
-	Threshold* getThresholdTool(void);
+	/*Getters*/
+	/*returns the correct tool instance from m_tools*/
+	Tool* getTool(ToolType tool_type, int tool_size); 
+	Threshold* getThresholdTool(void);	
 	Saturate* getSaturateTool(void);
 	Channels* getChannelsTool(void);
 	Quantize* getQuantizeTool(void);
 	Stamp * getStampTool(void);
 	Tool* getMotionBlurTool(int tool_size, int direction);
+
 private:
-	std::vector<std::vector<Tool *> > m_tools; //m_tools is a vector of tool instances
+	std::vector<std::vector<Tool *> > m_tools; //m_tools is a vector of tool instances that are initiated on program start
 };
 
 #endif
