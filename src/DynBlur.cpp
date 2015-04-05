@@ -65,8 +65,8 @@ void DynBlur::applyToolOnCanvas(PixelBuffer* canvas){
 			            posx = (x - mask_width / 2 + mx); 
 			            posy = (y - mask_height / 2 + my);
 			            // indexing out of window
-			            if(posx < m_startPointx - wsize / 2 || posy < m_startPointy - wsize / 2 || posx >= m_startPointx + wsize/2 || posy >= wsize + wsize/2 + 1)	continue;
-			            cout<<"tmp gets Accumulated"<<endl;
+			            if(posx < 0 || posy < 0 || posx >=canvas->getWidth() || posy >= canvas->getHeight())	continue;
+			            	cout<<"tmp gets Accumulated"<<endl;
 			            tmp = tmp + (canvas->getPixel(posx,posy) * m_mask->getValue(mx,my));
 			        } 
 			    }  
