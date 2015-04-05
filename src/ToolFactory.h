@@ -13,6 +13,9 @@ public:
 		SPRAY_CAN,
 		CALLIGRAPHY_PEN,
 		HIGHLIGHTER,
+		// interactive tools
+		STAMP,
+		DYN_BLUR,
 		// convolution tools
 		BLUR,
 		SHARPEN,
@@ -22,10 +25,7 @@ public:
 		THRESHOLD,
 		SATURATE,
 		CHANNELS,
-		QUANTIZE,
-		// interactive tools
-		STAMP,
-		DYN_BLUR
+		QUANTIZE
 	};
 	
 	ToolFactory();

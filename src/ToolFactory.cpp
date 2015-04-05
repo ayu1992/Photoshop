@@ -19,6 +19,8 @@
 #include "Saturate.h"
 #include "Channels.h"
 #include "Quantize.h"
+#include "Stamp.h"
+
 
 using std::cout;
 using std::endl;
@@ -47,6 +49,8 @@ ToolFactory::ToolFactory(){
 		pushVectorsOfSize<SprayCan>(&m_tools, 3);
 		pushVectorsOfSize<CalligraphyPen>(&m_tools, 3);
 		pushVectorsOfSize<Highlighter>(&m_tools, 3);
+		pushVectorsOfSize<Stamp>(&m_tools,1);
+		pushVectorsOfSize<DynBlur>(&m_tools,1);
 		pushVectorsOfSize<Blur>(&m_tools, 21);
 		pushVectorsOfSize<Sharpen>(&m_tools,21);
 		pushVectorsOfSize<EdgeDetection>(&m_tools,1);
@@ -55,11 +59,10 @@ ToolFactory::ToolFactory(){
 		pushVectorsOfSize<Saturate>(&m_tools,1);
 		pushVectorsOfSize<Channels>(&m_tools,1);
 		pushVectorsOfSize<Quantize>(&m_tools,1);
+
 	// size non-adjustable
 	/*	
-	pushVectorsOfSize<MotionBlur>(&m_tools,21);
 		// interactive tools
-	m_tools.push_back(new Stamp());
 	m_tools.push_back(new Dyn_Blur());*/
 }
 
@@ -73,7 +76,7 @@ ToolFactory::~ToolFactory(){
 /*ToolFactory returns the requested tool instance */
 Tool* ToolFactory::getTool(ToolType tool_type, int tool_size){
 	if(tool_type < 0 || tool_type >= m_tools.size() || tool_size < 0 || tool_size >= m_tools[tool_type].size()){
-		cout << "[ToolFactory] invalid request for tool"<<endl;
+		cout << "[ToolFactory] invalid request for tool"<< tool_type<< " size"<<tool_size<<endl;
 		return NULL;
 	}
 	return m_tools[tool_type][tool_size];

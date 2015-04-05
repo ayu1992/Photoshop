@@ -29,7 +29,7 @@ PixelBuffer* PixelBufferManager::getLatestSnapshot(void){
 		return NULL;
 	}
 	cout << "getting image"<< m_currentIdx << endl;
-	PixelBuffer* cpy = new PixelBuffer(m_snapshots[m_currentIdx]->getWidth(),m_snapshots[m_currentIdx]->getHeight(),ColorData(0.0,0.0,0.0,0.0));
+	PixelBuffer* cpy = new PixelBuffer(m_snapshots[m_currentIdx]->getWidth(),m_snapshots[m_currentIdx]->getHeight(),ColorData(0.0,0.0,0.0));
 	PixelBuffer::copyPixelBuffer(m_snapshots[m_currentIdx],cpy);
 	return cpy;
 }

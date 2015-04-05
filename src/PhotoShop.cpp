@@ -10,6 +10,7 @@
 #include "Saturate.h"
 #include "Channels.h"
 #include "Quantize.h"
+#include "Stamp.h"
 #include <cmath>
 
 using std::cout;
@@ -43,7 +44,10 @@ PhotoShop::~PhotoShop()
 void PhotoShop::mouseDragged(int x, int y)
 {
 
-    Tool* currentTool = m_toolFactory.getTool(getCurrentToolType(), m_curSize);
+    int toolSize = m_curSize;
+    if(m_curTool == ToolFactory::STAMP) toolSize = 0;
+
+    Tool* currentTool = m_toolFactory.getTool(getCurrentToolType(), toolSize);
     if(currentTool == NULL){
         std::cout<<"current tool is NULL"<<std::endl;
         return;
@@ -90,7 +94,10 @@ void PhotoShop::leftMouseDown(int x, int y)
 {
     /*TODO for mask based and interactive tools */
     // get requested Tool instance
-    Tool* currentTool = m_toolFactory.getTool(getCurrentToolType(), m_curSize);
+    int toolSize = m_curSize;
+    if(m_curTool == ToolFactory::STAMP) toolSize = 0;
+
+    Tool* currentTool = m_toolFactory.getTool(getCurrentToolType(), toolSize);
     int height = m_displayBuffer->getHeight();
     if(currentTool == NULL){
         std::cout << "current tool is null"<< endl;
@@ -168,9 +175,9 @@ void PhotoShop::initGlui()
     // UNDO,REDO,QUIT
     {
         m_gluiControlHooks.undoButton = new GLUI_Button(m_glui, "Undo", UI_UNDO, s_gluicallback);
-        undoEnabled(false);
+        undoEnabled(true);
         m_gluiControlHooks.redoButton  = new GLUI_Button(m_glui, "Redo", UI_REDO, s_gluicallback);
-        redoEnabled(false);
+        redoEnabled(true);
         
         new GLUI_Separator(m_glui);
         new GLUI_Button(m_glui, "Quit", UI_QUIT, (GLUI_Update_CB)exit);
@@ -425,15 +432,11 @@ void PhotoShop::loadSnapshot(PixelBuffer* newCanvas){
     m_displayBuffer = newCanvas;
     setWindowDimensions(m_displayBuffer->getWidth(),m_displayBuffer->getHeight()); 
     //cout<<"loading snapshot"<<endl;
-    //undoEnabled(m_pbManager.canUndo());
-    //redoEnabled(m_pbManager.canRedo());
 }
 
 void PhotoShop::takeSnapshot(PixelBuffer* unsaved){
     m_pbManager.takeSnapshot(unsaved);
     //cout<<"taking snapshot"<<endl;
-    //undoEnabled(m_pbManager.canUndo());
-    //redoEnabled(m_pbManager.canRedo());
 }
 void PhotoShop::loadImageToCanvas()
 {
@@ -448,7 +451,13 @@ void PhotoShop::loadImageToCanvas()
 
 void PhotoShop::loadImageToStamp()
 {   PixelBuffer *stamp = m_ioHandler.readImage(m_fileName);
-    
+    Tool * stampTool = m_toolFactory.getTool(ToolFactory::STAMP,0);
+    if(stampTool == NULL){
+        std::cout<<"current tool is NULL"<<std::endl;
+        return;
+    }
+    static_cast<Stamp *>(stampTool)->setStamp(stamp);
+
 }
 
 void PhotoShop::saveCanvasToFile()
@@ -589,9 +598,7 @@ void PhotoShop::redoEnabled(bool enabled)
 
 void PhotoShop::undoEnabled(bool enabled)
 {
-    cout<<"calling undoEnabled"<<endl;
     buttonEnabled(m_gluiControlHooks.undoButton, enabled);
-    cout<<"finish undoEnabled"<<endl;
 }
 
 void PhotoShop::saveCanvasEnabled(bool enabled)
